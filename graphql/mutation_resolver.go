@@ -1,6 +1,0 @@
-CreateAccount
-
-CreateProduct
-
-CreateOrder
-

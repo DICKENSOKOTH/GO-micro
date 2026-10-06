@@ -3,7 +3,7 @@ scalar Time
 type Account{
     id: String!
     name: String!
-    orderS: [order!]!
+    orders: [Order!]!
 }
 
 type Product{
@@ -13,7 +13,7 @@ type Product{
     price: Float!
 }
 
-type order{
+type Order{
     id: String!
     createdAt: Time!
     totalPrice: Float!
@@ -42,7 +42,7 @@ input ProductInput{
     price: Float!
 }
 
-input OrderProductInput{
+input OrderedProductInput{
     id: String!
     quantity: Int!
 }
@@ -53,8 +53,8 @@ input OrderInput{
 }
 
 type Mutation{
-    craeteAccount(account: AccountInput!): Account
-    createProduct(product: ProductInput!): product
+    createAccount(account: AccountInput!): Account
+    createProduct(product: ProductInput!): Product
     createOrder(order: OrderInput!): Order
 }
 
