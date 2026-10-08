@@ -8,7 +8,7 @@ import (
 )
 
 type Repository interface {
-	close()
+	Close()
 	PutAccount(ctx context.Context, a Account) error
 	GetAccountByID(ctx context.Context, id string) (*Account, error)
 	ListAccounts(ctx context.Context, skip uint64, take uint64) ([]Account, error)
@@ -32,7 +32,7 @@ func NewPostgresRepository(url string) (Repository, error) {
 	return &postgresRepository{db}, nil
 }
 
-func (r *postgresRepository) close(){
+func (r *postgresRepository) Close(){
 	r.db.Close()
 }
 
