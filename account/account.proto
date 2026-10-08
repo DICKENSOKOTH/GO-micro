@@ -1,4 +1,4 @@
-syntax = "proto3"
+syntax = "proto3";
 
 package pb;
 
@@ -24,8 +24,8 @@ message GetAccountResponse {
 }
 
 message GetAccountsRequest {
-    unit64 skip = 1;
-    unit64 take = 2;
+    uint64 skip = 1;
+    uint64 take = 2;
 }
 
 message GetAccountsResponse {
