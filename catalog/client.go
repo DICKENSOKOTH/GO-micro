@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"google.golang.org/grpc"
-	"github.com/DICKENSOKOTH/GO-micro/pb"
+	"github.com/DICKENSOKOTH/GO-micro/catalog/pb"
 )
 
 type Client struct{
