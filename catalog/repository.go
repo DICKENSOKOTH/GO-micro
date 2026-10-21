@@ -56,7 +56,7 @@ func (r *elasticRepository) PutProduct(ctx context.Context, p Product) error {
 		BodyJson(productDocument{
 			Name:        p.Name,
 			Description: p.Description,
-			Price:       p.price,
+			Price:       p.Price,
 		})
 	Do(ctx)
 	return err

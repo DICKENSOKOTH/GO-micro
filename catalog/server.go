@@ -1,3 +1,4 @@
+// go:generate protoc --go_out=./pb --go-grpc_out=./pb catalog.proto
 package catalog
 
 import (
@@ -6,13 +7,13 @@ import (
 	"log"
 	"net"
 
-	"github.com/DICKENSOKOTH/GO-micro/pb"
+	"github.com/DICKENSOKOTH/GO-micro/catalog/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
 type grpcServer struct {
-	pb.UnimplementedAccountServiceServer
+	pb.UnimplementedCatalogServiceServer
 	service Service
 }
 
@@ -22,33 +23,33 @@ func ListenGRPC(s Service, port int) error {
 		return err
 	}
 	serv := grpc.NewServer()
-	pb.RegisterAccountServiceServer(serv, &grpcServer{service: s})
+	pb.RegisterCatalogServiceServer(serv, &grpcServer{service: s})
 	reflection.Register(serv)
 	return serv.Serve(lis)
 }
 
 func (s *grpcServer) PostProduct(ctx context.Context, r *pb.PostProductRequest) (*pb.PostProductResponse, error) {
-	p, err := s.service.PostProduct(ctx, r.name, r.Description, r.Price)
+	p, err := s.service.PostProduct(ctx, r.Name, r.Description, r.Price)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 	return &pb.PostProductResponse{Product: &pb.Product{
-		id:          p.ID,
+		Id:          p.ID,
 		Name:        p.Name,
 		Description: p.Description,
 		Price:       p.Price,
 	}}, nil
 }
 
-func (s *grpcServer) GetProduct(ctx context.Context, r *pb.GetproductRequest) *pb.GetProductresponse {
-	p, err := s.service.GetProduct(ctx, r.id)
+func (s *grpcServer) GetProduct(ctx context.Context, r *pb.GetProductRequest) *pb.GetProductResponse {
+	p, err := s.service.GetProduct(ctx, r.Id)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
-	return &pb.GetProductresponse{
-		Product: &pb.product{
+	return &pb.GetProductResponse{
+		Product: &pb.Product{
 			Id:         p.ID,
 			Name:       p.Name,
 			Desription: p.Description,
@@ -57,15 +58,15 @@ func (s *grpcServer) GetProduct(ctx context.Context, r *pb.GetproductRequest) *p
 	}, nil
 }
 
-func (s *grpcServer) GetProducts(ctx context.Context, r *pb.GetproductsRequest) (*pb.GetProductsresponse, error) {
-	var res []product
+func (s *grpcServer) GetProducts(ctx context.Context, r *pb.GetProductsRequest) (*pb.GetProductsResponse, error) {
+	var res []Product
 	var err error
 	if r.Query != "" {
-		res, err = s.service.SearchProducts(ctx, r.Query, r.skip, r.take)
+		res, err = s.service.SearchProducts(ctx, r.Query, r.Skip, r.Take)
 	} else if len(r.Ids) != 0 {
 		res, err = s.service.GetProductByIDs(ctx, r.Ids)
 	} else {
-		res, err = s.service.GetProducts(ctx, r.skip, r.take)
+		res, err = s.service.GetProducts(ctx, r.Skip, r.Take)
 	}
 	if err != nil {
 		log.Println(err)
