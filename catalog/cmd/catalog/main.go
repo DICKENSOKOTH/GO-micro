@@ -9,20 +9,20 @@ import (
 	"github.com/tinrab/retry"
 )
 
-type Config struct{
-	DatabaseURL string `envconfig:"DATABASE_URL`
+type Config struct {
+	DatabaseURL string `envconfig:"DATABASE_URL"`
 }
 
-func main(){
+func main() {
 	var cfg Config
 	err := envconfig.Process("", &cfg)
-	if err != nil{
+	if err != nil {
 		log.Fatal(err)
 	}
 
-	var r.catalog.Repository
+	var r catalog.Repository
 	retry.ForeverSleep(2*time.Second, func(_ int) (err error) {
-		r, err = catalog.NewElasticRepository(cfg.DatabaseURl)
+		r, err = catalog.NewElasticRepository(cfg.DatabaseURL)
 		if err != nil {
 			log.Println(err)
 		}
