@@ -28,7 +28,7 @@ func (c *Client) Close() {
 func (c *Client) PostProduct(ctx context.Context, name, description string, price float64) (*Product, error) {
 	r, err := c.Service.PostProduct(
 		ctx,
-		&PostProductRequest{
+		&pb.PostProductRequest{
 			Name:        name,
 			Description: description,
 			Price:       price,
@@ -63,7 +63,7 @@ func (c *Client) GetProduct(ctx context.Context, id string) (*Product, error) {
 	}, nil
 }
 
-func (c *Client) GetProducts(ctx context.Context, skip uint64, take uint64, ids []string, query string) (*Product, error) {
+func (c *Client) GetProducts(ctx context.Context, skip uint64, take uint64, ids []string, query string) ([]Product, error) {
 	r, err := c.Service.GetProducts(
 		ctx,
 		&pb.GetProductsRequest{
@@ -76,14 +76,14 @@ func (c *Client) GetProducts(ctx context.Context, skip uint64, take uint64, ids 
 	if err != nil {
 		return nil, err
 	}
-	Products := []Product{}
+	products := []Product{}
 	for _, p := range r.Products {
-		Products = append(Products, Product{
+		products = append(products, Product{
 			ID:          p.Id,
 			Name:        p.Name,
 			Description: p.Description,
 			Price:       p.Price,
 		})
 	}
-	return Products, nil
+	return products, nil
 }

@@ -1,4 +1,4 @@
-// go:generate protoc --go_out=./pb --go-grpc_out=./pb catalog.proto
+//go:generate protoc --go_out=./pb --go-grpc_out=./pb catalog.proto
 package catalog
 
 import (
@@ -42,7 +42,7 @@ func (s *grpcServer) PostProduct(ctx context.Context, r *pb.PostProductRequest) 
 	}}, nil
 }
 
-func (s *grpcServer) GetProduct(ctx context.Context, r *pb.GetProductRequest) *pb.GetProductResponse {
+func (s *grpcServer) GetProduct(ctx context.Context, r *pb.GetProductRequest) (*pb.GetProductResponse, error) {
 	p, err := s.service.GetProduct(ctx, r.Id)
 	if err != nil {
 		log.Println(err)
@@ -50,10 +50,10 @@ func (s *grpcServer) GetProduct(ctx context.Context, r *pb.GetProductRequest) *p
 	}
 	return &pb.GetProductResponse{
 		Product: &pb.Product{
-			Id:         p.ID,
-			Name:       p.Name,
-			Desription: p.Description,
-			Price:      p.Price,
+			Id:          p.ID,
+			Name:        p.Name,
+			Description: p.Description,
+			Price:       p.Price,
 		},
 	}, nil
 }
@@ -76,7 +76,7 @@ func (s *grpcServer) GetProducts(ctx context.Context, r *pb.GetProductsRequest) 
 	for _, p := range res {
 		products = append(
 			products,
-			&pb.Products{
+			&pb.Product{
 				Id:          p.ID,
 				Name:        p.Name,
 				Description: p.Description,

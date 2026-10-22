@@ -6,7 +6,6 @@ import (
 	"errors"
 	"log"
 
-	"github.com/99designs/gqlgen/client"
 	elastic "gopkg.in/olivere/elastic.v5"
 )
 
@@ -28,9 +27,9 @@ type elasticRepository struct {
 }
 
 type productDocument struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Price       string `json:"price"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Price       float64 `json:"price"`
 }
 
 func NewElasticRepository(url string) (Repository, error) {
@@ -41,11 +40,10 @@ func NewElasticRepository(url string) (Repository, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &elasticRepository(client), nil
+	return &elasticRepository{client: client}, nil
 }
 
 func (r *elasticRepository) Close() {
-
 }
 
 func (r *elasticRepository) PutProduct(ctx context.Context, p Product) error {
@@ -57,8 +55,8 @@ func (r *elasticRepository) PutProduct(ctx context.Context, p Product) error {
 			Name:        p.Name,
 			Description: p.Description,
 			Price:       p.Price,
-		})
-	Do(ctx)
+		}).
+		Do(ctx)
 	return err
 }
 
@@ -75,19 +73,19 @@ func (r *elasticRepository) GetProductByID(ctx context.Context, id string) (*Pro
 		return nil, ErrNotFound
 	}
 	p := productDocument{}
-	if err = json.Unmarshal(res.Source, &p); err != nil {
+	if err = json.Unmarshal(*res.Source, &p); err != nil {
 		return nil, err
 	}
-	return &product{
+	return &Product{
 		ID:          id,
 		Name:        p.Name,
 		Description: p.Description,
 		Price:       p.Price,
-	}, err
+	}, nil
 }
 
 func (r *elasticRepository) ListProducts(ctx context.Context, skip uint64, take uint64) ([]Product, error) {
-	res, err := client.Search().
+	res, err := r.client.Search().
 		Index("catalog").
 		Type("product").
 		Query(elastic.NewMatchAllQuery()).
@@ -97,15 +95,15 @@ func (r *elasticRepository) ListProducts(ctx context.Context, skip uint64, take 
 		log.Println(err)
 		return nil, err
 	}
-	products := []product{}
+	products := []Product{}
 	for _, hit := range res.Hits.Hits {
 		p := productDocument{}
 		if err = json.Unmarshal(*hit.Source, &p); err == nil {
-			products = append(products, product{
+			products = append(products, Product{
 				ID:          hit.Id,
 				Name:        p.Name,
 				Description: p.Description,
-				price:       p.Price,
+				Price:       p.Price,
 			})
 		}
 	}
@@ -123,7 +121,7 @@ func (r *elasticRepository) ListProductsWithID(ctx context.Context, ids []string
 				Id(id),
 		)
 	}
-	res, err := client.MultiGet().
+	res, err := r.client.MultiGet().
 		Add(items...).
 		Do(ctx)
 	if err != nil {
@@ -133,8 +131,8 @@ func (r *elasticRepository) ListProductsWithID(ctx context.Context, ids []string
 	products := []Product{}
 	for _, doc := range res.Docs {
 		p := productDocument{}
-		if err = json.Unmarshal(*doc.Sorce, &p); err == nil {
-			products = append(products, product{
+		if err = json.Unmarshal(*doc.Source, &p); err == nil {
+			products = append(products, Product{
 				ID:          doc.Id,
 				Name:        p.Name,
 				Description: p.Description,
@@ -156,12 +154,12 @@ func (r *elasticRepository) SearchProducts(ctx context.Context, query string, sk
 		log.Println(err)
 		return nil, err
 	}
-	products := []product{}
+	products := []Product{}
 	for _, hit := range res.Hits.Hits {
 		p := productDocument{}
 		if err = json.Unmarshal(*hit.Source, &p); err == nil {
-			products = append(products, product{
-				Id:          hit.Id,
+			products = append(products, Product{
+				ID:          hit.Id,
 				Name:        p.Name,
 				Description: p.Description,
 				Price:       p.Price,

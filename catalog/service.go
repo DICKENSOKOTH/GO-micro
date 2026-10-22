@@ -15,26 +15,29 @@ type Service interface {
 }
 
 type Product struct {
-	ID          string `json:"id`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Price       string `json:"price"`
+	ID          string  `json:"id"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Price       float64 `json:"price"`
 }
 
 type catalogService struct {
-	repostory Repository
+	repository Repository
 }
 
 func NewService(r Repository) Service {
-	return &catalogService(r)
+	return &catalogService{repository: r}
 }
 
 func (s *catalogService) PostProduct(ctx context.Context, name, description string, price float64) (*Product, error) {
-	p := &product{
+	p := &Product{
 		Name:        name,
 		Description: description,
 		Price:       price,
 		ID:          ksuid.New().String(),
+	}
+	if err := s.repository.PutProduct(ctx, *p); err != nil {
+		return nil, err
 	}
 	return p, nil
 }
